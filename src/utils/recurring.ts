@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 export interface RecurringItem { label: string; amount: number; dayOfMonth: number; }
 
-export const RECURRING_CATS = ['Assurance', 'Frais bancaires', 'Impôts', 'Crédit', 'Logement', 'Loisirs', 'Abonnements', 'Sport', 'Éducation', 'Bien-être', 'Enfants', 'Animaux'];
+export const RECURRING_CATS = ['Assurance', 'Frais bancaires', 'Impôts', 'Crédit', 'Logement', 'Loisirs', 'Sport', 'Éducation', 'Bien-être', 'Enfants', 'Animaux'];
 
 export function groupRecurring(txs: Transaction[]): RecurringItem[] {
   const groups: Record<string, Transaction[]> = {};

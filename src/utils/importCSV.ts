@@ -17,18 +17,19 @@ export async function importCSV(
   currentAccounts: Account[],
 ): Promise<{ accounts: Account[]; transactions: Transaction[]; newCount: number }> {
   const content = await readFileContent(file);
-  const { transactions: newTxs } = parseCaisseEpargneCSV(content, accountId);
+  const { transactions: newTxs, balance: csvBalance } = parseCaisseEpargneCSV(content, accountId);
   const existingTxs = Storage.getTransactions();
   const existingIds = new Set(existingTxs.map(t => t.id));
   const onlyNew = newTxs.filter(t => !existingIds.has(t.id));
   const merged = [...existingTxs, ...onlyNew].sort((a, b) => b.date.localeCompare(a.date));
   Storage.saveTransactions(merged);
-  const delta = onlyNew.reduce((s, t) => s + t.amount, 0);
-  const updatedAccounts = currentAccounts.map(a =>
-    a.id === accountId
-      ? { ...a, balance: Math.round((a.balance + delta) * 100) / 100, lastUpdated: new Date().toISOString() }
-      : a
-  );
+  const updatedAccounts = currentAccounts.map(a => {
+    if (a.id !== accountId) return a;
+    const newBalance = csvBalance !== null
+      ? csvBalance
+      : Math.round((a.balance + onlyNew.reduce((s, t) => s + t.amount, 0)) * 100) / 100;
+    return { ...a, balance: newBalance, lastUpdated: new Date().toISOString() };
+  });
   Storage.saveAccounts(updatedAccounts);
   return { accounts: updatedAccounts, transactions: merged, newCount: onlyNew.length };
 }
