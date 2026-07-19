@@ -138,7 +138,7 @@ export default function App() {
         {tab === 'installments' && <Installments />}
         {tab === 'simulator' && <Simulator />}
         {tab === 'projection' && <Projection />}
-        {tab === 'accounts' && <Accounts onNavigate={setTab} />}
+        {tab === 'accounts' && <Accounts />}
       </div>
       <nav className="tab-bar" style={{ paddingBottom: isStandalone ? 30 : 8 }}>
         {TABS.map(t => {

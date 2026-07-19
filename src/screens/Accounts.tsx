@@ -49,7 +49,7 @@ function importData(file: File, onDone: () => void) {
   reader.readAsText(file);
 }
 
-export default function Accounts({ onNavigate }: { onNavigate: (tab: string) => void }) {
+export default function Accounts() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
