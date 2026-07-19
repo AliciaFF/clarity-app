@@ -65,19 +65,19 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): { tra
 
 function mapCategory(cat: string, subCat: string): string {
   const c = (cat + ' ' + subCat).toLowerCase();
-  if (c.includes('alimentation') || c.includes('course')) return '🛒 Courses';
-  if (c.includes('restaur') || c.includes('rapide')) return '🍽️ Restauration';
-  if (c.includes('shopping')) return '🛍️ Shopping';
+  if (c.includes('alimentation') || c.includes('course')) return '🥖 Courses';
+  if (c.includes('restaur') || c.includes('rapide')) return '🍕 Restauration';
+  if (c.includes('shopping')) return '🛒 Shopping';
   if (c.includes('transport') || c.includes('carburant') || c.includes('train')) return '🚗 Transport';
   if (c.includes('logement') || c.includes('loyer')) return '🏠 Logement';
-  if (c.includes('sante') || c.includes('santé') || c.includes('medic')) return '🏥 Santé';
-  if (c.includes('loisir') || c.includes('vacance') || c.includes('musique') || c.includes('video')) return '🎬 Loisirs';
-  if (c.includes('impot') || c.includes('taxe') || c.includes('contribution')) return '🏛️ Impôts';
-  if (c.includes('banque') || c.includes('assurance')) return '🛡️ Assurance';
-  if (c.includes('vetement') || c.includes('chaussure')) return '👗 Vêtements';
-  if (c.includes('revenu') || c.includes('salaire') || c.includes('rentree')) return '💰 Revenus';
+  if (c.includes('sante') || c.includes('santé') || c.includes('medic')) return '💊 Santé';
+  if (c.includes('loisir') || c.includes('vacance') || c.includes('musique') || c.includes('video')) return '🎮 Loisirs';
+  if (c.includes('impot') || c.includes('taxe') || c.includes('contribution')) return '📋 Impôts';
+  if (c.includes('banque') || c.includes('assurance')) return '🔒 Assurance';
+  if (c.includes('vetement') || c.includes('chaussure')) return '👔 Vêtements';
+  if (c.includes('revenu') || c.includes('salaire') || c.includes('rentree')) return '💶 Revenus';
   if (c.includes('virement')) return '🔄 Virement';
-  if (c.includes('retrait')) return '💵 Retrait';
+  if (c.includes('retrait')) return '🏧 Retrait';
   if (c.includes('frais bancaire')) return '🏦 Frais bancaires';
   return '📦 Autres';
 }

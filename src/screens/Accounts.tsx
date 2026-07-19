@@ -36,7 +36,7 @@ function importData(file: File, onDone: () => void) {
       if (data.overrides) localStorage.setItem('bt_projection_overrides', data.overrides);
       onDone();
     } catch {
-      alert('Fichier invalide.');
+      dialog.alert('Fichier invalide.');
     }
   };
   reader.readAsText(file);

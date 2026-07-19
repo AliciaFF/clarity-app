@@ -16,7 +16,6 @@ export async function extractBalanceFromPDF(file: File): Promise<number | null> 
     fullText += pageText + '\n';
   }
 
-  console.log('[PDF] Texte extrait :', fullText.substring(0, 3000));
   return parseBalance(fullText);
 }
 
