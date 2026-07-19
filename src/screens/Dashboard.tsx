@@ -29,11 +29,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
     const file = e.target.files?.[0];
     if (!file || !importAccountId) return;
     e.target.value = '';
-    const result = await importCSV(file, importAccountId, accounts);
-    setTransactions(result.transactions);
-    setAccounts(result.accounts);
-    setImportModal(false);
-    await dialog.alert(`✅ ${result.newCount} nouvelle(s) transaction(s) importée(s)\nSolde mis à jour !`);
+    try {
+      const result = await importCSV(file, importAccountId, accounts);
+      setTransactions(result.transactions);
+      setAccounts(result.accounts);
+      setImportModal(false);
+      await dialog.alert(`✅ ${result.newCount} nouvelle(s) transaction(s) importée(s)\nSolde mis à jour !`);
+    } catch {
+      await dialog.alert('Erreur lors de l\'import. Vérifiez que le fichier est un CSV Caisse d\'Épargne valide.');
+    }
   };
 
   const [balanceModal, setBalanceModal] = useState(false);

@@ -14,14 +14,18 @@ function exportData() {
     installments: Storage.getInstallments(),
     excluded: localStorage.getItem('bt_projection_excluded'),
     overrides: localStorage.getItem('bt_projection_overrides'),
+    categories: localStorage.getItem('bt_categories'),
+    hiddenRecurring: localStorage.getItem('bt_hidden_recurring'),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `clarity-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function importData(file: File, onDone: () => void) {
@@ -29,11 +33,14 @@ function importData(file: File, onDone: () => void) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target?.result as string);
-      if (data.accounts) Storage.saveAccounts(data.accounts);
-      if (data.transactions) Storage.saveTransactions(data.transactions);
-      if (data.installments) Storage.saveInstallments(data.installments);
-      if (data.excluded) localStorage.setItem('bt_projection_excluded', data.excluded);
-      if (data.overrides) localStorage.setItem('bt_projection_overrides', data.overrides);
+      if (typeof data !== 'object' || data === null) throw new Error();
+      if (data.accounts && Array.isArray(data.accounts)) Storage.saveAccounts(data.accounts);
+      if (data.transactions && Array.isArray(data.transactions)) Storage.saveTransactions(data.transactions);
+      if (data.installments && Array.isArray(data.installments)) Storage.saveInstallments(data.installments);
+      if (typeof data.excluded === 'string') localStorage.setItem('bt_projection_excluded', data.excluded);
+      if (typeof data.overrides === 'string') localStorage.setItem('bt_projection_overrides', data.overrides);
+      if (typeof data.categories === 'string') localStorage.setItem('bt_categories', data.categories);
+      if (typeof data.hiddenRecurring === 'string') localStorage.setItem('bt_hidden_recurring', data.hiddenRecurring);
       onDone();
     } catch {
       dialog.alert('Fichier invalide.');
@@ -123,7 +130,7 @@ export default function Accounts({ onNavigate }: { onNavigate: (tab: string) => 
           Sauvegardez vos données avant de réinstaller l'appli, puis restaurez-les ensuite.
         </p>
         <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }}
-          onChange={e => { const f = e.target.files?.[0]; if (f) importData(f, async () => { setAccounts(Storage.getAccounts()); await dialog.alert('Données restaurées !'); }); e.target.value = ''; }} />
+          onChange={e => { const f = e.target.files?.[0]; if (f) importData(f, async () => { await dialog.alert('Données restaurées !'); window.location.reload(); }); e.target.value = ''; }} />
       </div>
 
       <div className="card" style={{ marginTop: 12 }}>
@@ -131,6 +138,13 @@ export default function Accounts({ onNavigate }: { onNavigate: (tab: string) => 
         <button className="btn-primary" style={{ width: '100%' }} onClick={() => onNavigate('installments')}>Voir mes mensualités</button>
       </div>
 
+
+      <div className="card" style={{ marginTop: 12, textAlign: 'center' }}>
+        <a href="/privacy.html" target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: 12, color: '#90A4AE', textDecoration: 'none' }}>
+          Politique de confidentialité
+        </a>
+      </div>
 
       <div className="spacer-lg" />
 

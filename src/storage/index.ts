@@ -12,7 +12,11 @@ function get<T>(key: string): T[] {
   try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
 }
 function set<T>(key: string, data: T[]) {
-  localStorage.setItem(key, JSON.stringify(data));
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    throw new Error('Stockage plein. Veuillez sauvegarder puis supprimer d\'anciennes données.');
+  }
 }
 
 export const Storage = {

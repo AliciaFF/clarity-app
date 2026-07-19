@@ -43,7 +43,8 @@ export default function Simulator() {
   const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageUrl(URL.createObjectURL(file));
+    const blobUrl = URL.createObjectURL(file);
+    setImageUrl(blobUrl);
     setStep('loading');
     setError('');
     try {
@@ -120,6 +121,8 @@ export default function Simulator() {
     } catch {
       setStep('confirm');
       setError('Erreur lors de l\'analyse — entrez le montant manuellement.');
+    } finally {
+      URL.revokeObjectURL(blobUrl);
     }
   };
 

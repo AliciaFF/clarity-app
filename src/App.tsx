@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Storage } from './storage';
 import Dashboard from './screens/Dashboard';
 import Transactions from './screens/Transactions';
@@ -66,10 +66,22 @@ const IconBank = ({ color }: { color: string }) => (
   </svg>
 );
 
+const IconRepeat = ({ color }: { color: string }) => (
+  <svg width="28" height="28" viewBox="0 0 28 28" {...s} stroke={color}>
+    <path d="M4 8 L24 8" />
+    <path d="M20 4 L24 8 L20 12" />
+    <path d="M24 20 L4 20" />
+    <path d="M8 16 L4 20 L8 24" />
+    <line x1="4" y1="8" x2="4" y2="20" />
+    <line x1="24" y1="8" x2="24" y2="20" />
+  </svg>
+);
+
 const TABS = [
   { id: 'dashboard', label: 'Accueil', Icon: IconHome },
   { id: 'transactions', label: 'Dépenses', Icon: IconReceipt },
   { id: 'simulator', label: 'Simulateur', Icon: IconCalculator },
+  { id: 'installments', label: 'Mensualités', Icon: IconRepeat },
   { id: 'projection', label: 'Projection', Icon: IconChart },
   { id: 'accounts', label: 'Comptes', Icon: IconBank },
 ];
@@ -92,12 +104,20 @@ function Onboarding({ onDone }: { onDone: () => void }) {
   );
 }
 
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-
 export default function App() {
   const [tab, setTab] = useState('dashboard');
   const [onboarded, setOnboarded] = useState(() => Storage.getAccounts().length > 0);
   const [dialogState, setDialogState] = useState<DialogState>(null);
+  const [isStandalone, setIsStandalone] = useState(
+    () => window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(display-mode: standalone)');
+    const handler = (e: MediaQueryListEvent) => setIsStandalone(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   if (!onboarded) {
     return <Onboarding onDone={() => { setTab('accounts'); setOnboarded(true); }} />;

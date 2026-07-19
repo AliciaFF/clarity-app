@@ -296,7 +296,7 @@ export default function Transactions() {
     const amount = parseFloat(newTx.amount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0) { await dialog.alert('Montant invalide'); return; }
     const tx: Transaction = {
-      id: Date.now().toString(),
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
       accountId: newTx.accountId,
       label: newTx.label.trim(),
       amount: newTx.type === 'sortie' ? -amount : amount,
@@ -318,11 +318,15 @@ export default function Transactions() {
     const file = e.target.files?.[0];
     if (!file || !importAccountId) return;
     e.target.value = '';
-    const result = await importCSV(file, importAccountId, accounts);
-    setTransactions(result.transactions);
-    setAccounts(result.accounts);
-    setImportMode(false);
-    await dialog.alert(`✅ ${result.newCount} nouvelle(s) transaction(s) importée(s)\nSolde mis à jour !`);
+    try {
+      const result = await importCSV(file, importAccountId, accounts);
+      setTransactions(result.transactions);
+      setAccounts(result.accounts);
+      setImportMode(false);
+      await dialog.alert(`✅ ${result.newCount} nouvelle(s) transaction(s) importée(s)\nSolde mis à jour !`);
+    } catch {
+      await dialog.alert('Erreur lors de l\'import. Vérifiez que le fichier est un CSV Caisse d\'Épargne valide.');
+    }
   };
 
   return (

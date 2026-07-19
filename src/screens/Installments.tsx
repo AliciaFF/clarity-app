@@ -54,7 +54,8 @@ export default function Installments() {
     setForm({ ...emptyForm, accountId: accounts[0]?.id || '' });
   };
 
-  const markPaid = (id: string) => {
+  const markPaid = async (id: string) => {
+    if (!await dialog.confirm('Confirmer le paiement de cette mensualité ?')) return;
     const updated = plans.map(p => {
       if (p.id !== id) return p;
       const newPaid = p.paidMonths + 1;
