@@ -1,4 +1,4 @@
-export type AccountType = 'perso' | 'pro';
+export type AccountType = 'perso' | 'pro' | 'especes';
 
 export interface Account {
   id: string;
@@ -15,6 +15,7 @@ export interface Transaction {
   label: string;
   amount: number;
   category: string;
+  manual?: boolean;
 }
 
 export interface InstallmentPlan {

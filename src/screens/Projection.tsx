@@ -1,5 +1,7 @@
+import { fmt } from '../utils';
 import { useState, useEffect } from 'react';
 import { Storage } from '../storage';
+import { detectRecurring, type RecurringItem } from '../utils/recurring';
 import type { Account, InstallmentPlan, Transaction } from '../types';
 import dayjs from 'dayjs';
 
@@ -19,43 +21,13 @@ function saveOverrides(o: Record<string, number>) {
   localStorage.setItem(OVERRIDES_KEY, JSON.stringify(o));
 }
 
-interface RecurringItem { label: string; amount: number; dayOfMonth: number; }
 interface ProjectionDay { date: string; balance: number; events: { label: string; amount: number }[]; }
-
-function buildRecurring(txs: Transaction[], account: Account): { debits: RecurringItem[]; credits: RecurringItem[] } {
-  const today = dayjs();
-  const threeMonthsAgo = today.subtract(3, 'month').format('YYYY-MM-DD');
-  const RECURRING_CATS = ['Assurance', 'Frais bancaires', 'Impôts', 'Crédit', 'Logement', 'Loisirs', 'Abonnements', 'Sport', 'Éducation', 'Bien-être', 'Enfants', 'Animaux'];
-
-  const group = (list: Transaction[]) => {
-    const groups: Record<string, Transaction[]> = {};
-    for (const t of list) {
-      const key = `${Math.round(t.amount)}_${t.label.substring(0, 15)}`;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(t);
-    }
-    return Object.values(groups).map(g => ({
-      label: g[0].label, amount: g[0].amount,
-      dayOfMonth: Math.round(g.reduce((s, t) => s + dayjs(t.date).date(), 0) / g.length),
-    }));
-  };
-
-  const debits = group(txs.filter(t =>
-    t.accountId === account.id && t.amount < 0 && t.date >= threeMonthsAgo &&
-    RECURRING_CATS.some(cat => t.category.includes(cat))
-  ));
-  const credits = group(txs.filter(t =>
-    t.accountId === account.id && t.amount > 0 && t.date >= threeMonthsAgo &&
-    t.category.includes('Revenus')
-  ));
-  return { debits, credits };
-}
 
 function computeProjection(account: Account, plans: InstallmentPlan[], txs: Transaction[], days: number, excluded: string[], overrides: Record<string, number>): ProjectionDay[] {
   const result: ProjectionDay[] = [];
   let balance = account.balance;
   const today = dayjs();
-  const { debits, credits } = buildRecurring(txs, account);
+  const { debits, credits } = detectRecurring(txs, [account.id]);
   const allRecurring = [...debits, ...credits]
     .filter(r => !excluded.includes(r.label))
     .map(r => ({ ...r, dayOfMonth: overrides[r.label] ?? r.dayOfMonth }));
@@ -101,9 +73,10 @@ export default function Projection() {
     const acc = accounts.find(a => a.id === selectedId);
     if (!acc) return;
     const txs = Storage.getTransactions();
-    const { debits, credits } = buildRecurring(txs, acc);
+    const { debits, credits } = detectRecurring(txs, [acc.id]);
     setAllRecurring([...debits, ...credits]);
     setProjection(computeProjection(acc, Storage.getInstallments(), txs, days, excluded, overrides));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, days, accounts, excluded, overrides]);
 
   const toggleExclude = (label: string) => {
@@ -120,18 +93,14 @@ export default function Projection() {
 
   const account = accounts.find(a => a.id === selectedId);
   const overdrafts = projection.filter(d => d.balance < 0);
-  const minBalance = projection.reduce((m, d) => Math.min(m, d.balance), Infinity);
   const daysWithEvents = projection.filter(d => d.events.length > 0 || d.balance < 0);
 
   return (
     <div>
-      <div className="header">
-        <div className="header-row">
-          <h1>Projection</h1>
-          <button onClick={() => setShowManage(true)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 20, padding: '6px 14px', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-            Gérer
-          </button>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 16px', paddingTop: '8px' }}>
+        <button onClick={() => setShowManage(true)} style={{ background: '#E8E8E8', border: 'none', borderRadius: 20, padding: '6px 14px', color: '#0D0D0D', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+          Gérer
+        </button>
       </div>
 
       <div className="chips">
@@ -147,15 +116,9 @@ export default function Projection() {
 
       {account && (
         <div style={{ display: 'flex', gap: 10, padding: '10px 16px 0' }}>
-          <div style={{ flex: 1, background: '#E8EAF6', borderRadius: 14, padding: 14 }}>
-            <p style={{ fontSize: 12, color: '#546E7A' }}>Solde actuel</p>
-            <p style={{ fontSize: 20, fontWeight: 800, color: account.balance < 0 ? '#EF5350' : '#1A237E' }}>{account.balance.toFixed(2).replace('.', ',')} €</p>
-          </div>
-          <div style={{ flex: 1, background: minBalance < 0 ? '#FFEBEE' : '#E8F5E9', borderRadius: 14, padding: 14 }}>
-            <p style={{ fontSize: 12, color: '#546E7A' }}>Solde minimum</p>
-            <p style={{ fontSize: 20, fontWeight: 800, color: minBalance < 0 ? '#EF5350' : '#2E7D32' }}>
-              {minBalance === Infinity ? '—' : `${minBalance.toFixed(2).replace('.', ',')} €`}
-            </p>
+          <div style={{ flex: 1, background: '#C9A040', borderRadius: 14, padding: 14, textAlign: 'center' }}>
+            <p style={{ fontSize: 12, color: '#fff' }}>Solde actuel</p>
+            <p style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{fmt(account.balance)} €</p>
           </div>
         </div>
       )}
@@ -168,28 +131,12 @@ export default function Projection() {
         </div>
       )}
 
-      <p className="section-title">Détail des prélèvements</p>
-
-      {daysWithEvents.length === 0 ? (
-        <div className="empty-state">
-          <div className="icon">📈</div>
-          <h3>Aucun prélèvement détecté</h3>
-          <p>Importe tes transactions et ajoute tes mensualités pour voir la projection</p>
-        </div>
-      ) : daysWithEvents.map(day => (
+      {daysWithEvents.map(day => (
         <div key={day.date} className="card" style={{ borderLeft: day.balance < 0 ? '4px solid #EF5350' : '4px solid #E0E0E0', background: day.balance < 0 ? '#FFF8F8' : '#fff' }}>
-          <div className="row" style={{ marginBottom: 6 }}>
+          <div className="row">
             <p style={{ fontWeight: 700, color: '#455A64' }}>{dayjs(day.date).format('ddd DD/MM')}</p>
-            <p style={{ fontWeight: 700, color: day.balance < 0 ? '#EF5350' : '#43A047' }}>{day.balance.toFixed(2).replace('.', ',')} €</p>
+            <p style={{ fontWeight: 700, color: day.balance < 0 ? '#EF5350' : '#43A047' }}>{fmt(day.balance)} €</p>
           </div>
-          {day.events.map((e, i) => (
-            <div key={i} className="row">
-              <p style={{ fontSize: 13, color: '#546E7A' }}>{e.label}</p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: e.amount < 0 ? '#EF5350' : '#43A047' }}>
-                {e.amount > 0 ? '+' : ''}{e.amount.toFixed(2).replace('.', ',')} €
-              </p>
-            </div>
-          ))}
         </div>
       ))}
 
@@ -203,7 +150,7 @@ export default function Projection() {
               <h2>Gérer la projection</h2>
               <button onClick={() => setShowManage(false)} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#90A4AE' }}>✕</button>
             </div>
-            <p style={{ fontSize: 13, color: '#90A4AE', marginBottom: 14 }}>Coche pour exclure un élément de la projection.</p>
+            <p style={{ fontSize: 13, color: '#90A4AE', marginBottom: 14 }}>Appuyez pour inclure ou exclure un élément de la projection, ou pour modifier le jour du mois.</p>
             {allRecurring.length === 0 && <p style={{ fontSize: 14, color: '#90A4AE' }}>Aucun élément détecté.</p>}
             {allRecurring.map(r => {
               const currentDay = overrides[r.label] ?? r.dayOfMonth;
@@ -213,7 +160,7 @@ export default function Projection() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 15, fontWeight: 600, color: '#263238', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</p>
                       <p style={{ fontSize: 12, color: r.amount > 0 ? '#43A047' : '#EF5350', marginTop: 2 }}>
-                        {r.amount > 0 ? '+' : ''}{r.amount.toFixed(2).replace('.', ',')} €
+                        {r.amount > 0 ? '+' : ''}{fmt(r.amount)} €
                       </p>
                     </div>
                     <button
@@ -232,7 +179,7 @@ export default function Projection() {
                     <input
                       type="number" min={1} max={31} value={currentDay}
                       onChange={e => setDayOverride(r.label, Math.min(31, Math.max(1, parseInt(e.target.value) || 1)))}
-                      style={{ width: 44, border: '1px solid #CFD8DC', borderRadius: 6, padding: '3px 6px', fontSize: 13, fontWeight: 600, color: '#1A237E', textAlign: 'center', background: '#F0F4F8', outline: 'none' }}
+                      style={{ width: 44, border: '1px solid #CFD8DC', borderRadius: 6, padding: '3px 6px', fontSize: 13, fontWeight: 600, color: '#C9A040', textAlign: 'center', background: '#F0F4F8', outline: 'none' }}
                     />
                   </div>
                 </div>

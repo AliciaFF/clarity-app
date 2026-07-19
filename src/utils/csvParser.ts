@@ -1,13 +1,30 @@
 import type { Transaction } from '../types';
+import { Storage } from '../storage';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
 // Format Caisse d'Épargne :
 // Date;Libelle simplifie;Libelle operation;Reference;Infos;Type;Categorie;Sous-categorie;Debit;Credit;Date op;Date valeur;Pointage
-export function parseCaisseEpargneCSV(content: string, accountId: string): Transaction[] {
+export function parseCaisseEpargneCSV(content: string, accountId: string): { transactions: Transaction[]; balance: number | null } {
   const lines = content.split('\n').filter(l => l.trim().length > 0);
   const transactions: Transaction[] = [];
+  let balance: number | null = null;
+  const catRules = Storage.getCatRules();
+  const labelRules = Storage.getLabelRules();
+
+  // Chercher le solde final dans l'en-tête
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    if (lower.includes('solde') && (lower.includes('fin') || lower.includes('final') || lower.includes('clôture') || lower.includes('cloture') || lower.includes('arrêt') || lower.includes('arret'))) {
+      const cols = line.split(';').map(c => c.replace(/"/g, '').trim());
+      for (const col of cols) {
+        const val = parseFloat(col.replace(/\s/g, '').replace(',', '.'));
+        if (!isNaN(val) && val !== 0) { balance = val; break; }
+      }
+      if (balance !== null) break;
+    }
+  }
 
   for (const line of lines) {
     const cols = line.split(';').map(c => c.replace(/"/g, '').trim());
@@ -18,8 +35,12 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): Trans
     const date = dayjs(cols[0], 'DD/MM/YYYY', true);
     if (!date.isValid()) continue;
 
-    const label = cols[1] || cols[2] || '';
-    const category = mapCategory(cols[6] || '', cols[7] || '');
+    const rawLabel = cols[1] || cols[2] || '';
+    const labelKey = rawLabel.toLowerCase().trim();
+    const ruleLabel = Object.entries(labelRules).find(([key]) => labelKey.includes(key))?.[1];
+    const label = ruleLabel ?? rawLabel;
+    const ruleCategory = Object.entries(catRules).find(([key]) => labelKey.includes(key))?.[1];
+    const category = ruleCategory ?? mapCategory(cols[6] || '', cols[7] || '');
 
     // Débit (col 8) ou Crédit (col 9)
     const debitStr = (cols[8] || '').replace(/\s/g, '').replace(',', '.');
@@ -31,7 +52,7 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): Trans
     if (amount === 0) continue;
 
     transactions.push({
-      id: `${accountId}_${cols[0]}_${cols[3] || label}_${amount}`.replace(/\s/g, '_').substring(0, 80),
+      id: `${accountId}_${cols[0]}_${cols[3] || label}_${amount}_${transactions.length}`.replace(/\s/g, '_').substring(0, 80),
       accountId,
       date: date.format('YYYY-MM-DD'),
       label: label.trim(),
@@ -39,7 +60,7 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): Trans
       category,
     });
   }
-  return transactions;
+  return { transactions, balance };
 }
 
 function mapCategory(cat: string, subCat: string): string {
