@@ -66,14 +66,18 @@ const IconBank = ({ color }: { color: string }) => (
   </svg>
 );
 
-const IconRepeat = ({ color }: { color: string }) => (
+const IconCalendar = ({ color }: { color: string }) => (
   <svg width="28" height="28" viewBox="0 0 28 28" {...s} stroke={color}>
-    <path d="M4 8 L24 8" />
-    <path d="M20 4 L24 8 L20 12" />
-    <path d="M24 20 L4 20" />
-    <path d="M8 16 L4 20 L8 24" />
-    <line x1="4" y1="8" x2="4" y2="20" />
-    <line x1="24" y1="8" x2="24" y2="20" />
+    <rect x="3" y="5" width="22" height="20" rx="3" />
+    <line x1="3" y1="12" x2="25" y2="12" />
+    <line x1="9" y1="3" x2="9" y2="8" />
+    <line x1="19" y1="3" x2="19" y2="8" />
+    <line x1="8" y1="17" x2="10" y2="17" />
+    <line x1="13" y1="17" x2="15" y2="17" />
+    <line x1="18" y1="17" x2="20" y2="17" />
+    <line x1="8" y1="21" x2="10" y2="21" />
+    <line x1="13" y1="21" x2="15" y2="21" />
+    <line x1="18" y1="21" x2="20" y2="21" />
   </svg>
 );
 
@@ -81,7 +85,7 @@ const TABS = [
   { id: 'dashboard', label: 'Accueil', Icon: IconHome },
   { id: 'transactions', label: 'Dépenses', Icon: IconReceipt },
   { id: 'simulator', label: 'Simulateur', Icon: IconCalculator },
-  { id: 'installments', label: 'Mensualités', Icon: IconRepeat },
+  { id: 'installments', label: 'Mensualités', Icon: IconCalendar },
   { id: 'projection', label: 'Projection', Icon: IconChart },
   { id: 'accounts', label: 'Comptes', Icon: IconBank },
 ];
