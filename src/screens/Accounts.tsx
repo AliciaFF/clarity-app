@@ -133,12 +133,6 @@ export default function Accounts({ onNavigate }: { onNavigate: (tab: string) => 
           onChange={e => { const f = e.target.files?.[0]; if (f) importData(f, async () => { await dialog.alert('Données restaurées !'); window.location.reload(); }); e.target.value = ''; }} />
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
-        <p style={{ fontSize: 14, fontWeight: 700, color: '#263238', marginBottom: 12 }}>Mensualités</p>
-        <button className="btn-primary" style={{ width: '100%' }} onClick={() => onNavigate('installments')}>Voir mes mensualités</button>
-      </div>
-
-
       <div className="card" style={{ marginTop: 12, textAlign: 'center' }}>
         <a href="/privacy.html" target="_blank" rel="noopener noreferrer"
           style={{ fontSize: 12, color: '#90A4AE', textDecoration: 'none' }}>
