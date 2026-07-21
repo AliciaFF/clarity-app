@@ -267,17 +267,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       )}
 
       {/* Actions rapides */}
-      <div style={{ padding: '12px 16px', marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
-        <button onClick={() => accounts.length === 1 ? importRef.current?.click() : setImportModal(true)}
-          style={{ background: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 28 }}><IconDownload size={24} color="#0D0D0D" /></div>
-          <p style={{ fontSize: 10, fontWeight: 600, color: '#0D0D0D', marginTop: 5 }}>Importer CSV</p>
-        </button>
-        <button onClick={() => { setBalanceInput(''); setBalanceModal(true); }}
-          style={{ background: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', textAlign: 'center' }}>
-          <div style={{ fontSize: 22 }}>✏️</div>
-          <p style={{ fontSize: 10, fontWeight: 600, color: '#0D0D0D', marginTop: 5 }}>Modifier solde</p>
-        </button>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '24px 16px 32px' }}>
+        <button onClick={() => accounts.length === 1 ? importRef.current?.click() : setImportModal(true)} className="chip">Importer CSV</button>
+        <button onClick={() => { setBalanceInput(''); setBalanceModal(true); }} className="chip">Modifier solde</button>
         <input ref={importRef} type="file" accept=".csv,.txt,text/csv" onChange={handleImport} style={{ display: 'none' }} />
       </div>
 
