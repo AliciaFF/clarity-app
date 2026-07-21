@@ -331,11 +331,6 @@ export default function Transactions() {
         ))}
       </div>
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '0 16px 10px', background: '#fff' }}>
-        <button onClick={() => setImportMode(true)} className="chip">Importer CSV</button>
-        <button onClick={() => { setNewTx({ label: '', amount: '', date: dayjs().format('DD/MM/YYYY'), category: '', accountId: accounts[0]?.id || '', type: 'sortie' }); setAddMode(true); }} className="chip">+ Ajouter</button>
-      </div>
 
       {/* Navigateur de mois */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, padding: '12px 16px', background: '#fff', borderBottom: '1px solid #F0F0F0' }}>
@@ -411,6 +406,12 @@ export default function Transactions() {
                 </div>
               );
             })}
+          </div>
+
+          {/* Boutons actions */}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '16px 16px 8px' }}>
+            <button onClick={() => setImportMode(true)} className="chip">Importer CSV</button>
+            <button onClick={() => { setNewTx({ label: '', amount: '', date: dayjs().format('DD/MM/YYYY'), category: '', accountId: accounts[0]?.id || '', type: 'sortie' }); setAddMode(true); }} className="chip">+ Ajouter</button>
           </div>
 
         </>
