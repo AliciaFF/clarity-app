@@ -54,8 +54,7 @@ function AccRow({ acc }: { acc: { id: string; name: string; type: string; balanc
 }
 
 function getGreeting(hour: number) {
-  if (hour >= 5 && hour < 12) return { text: 'Bonjour', icon: 'sun' };
-  if (hour >= 12 && hour < 18) return { text: 'Bon après-midi', icon: 'sun' };
+  if (hour >= 5 && hour < 18) return { text: 'Bonjour', icon: 'sun' };
   return { text: 'Bonsoir', icon: 'moon' };
 }
 
