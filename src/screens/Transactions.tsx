@@ -409,7 +409,7 @@ export default function Transactions() {
           </div>
 
           {/* Boutons actions */}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '24px 16px 32px' }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '24px 16px 32px', background: '#F2F4F7', marginTop: 12 }}>
             <button onClick={() => setImportMode(true)} className="chip">Importer CSV</button>
             <button onClick={() => { setNewTx({ label: '', amount: '', date: dayjs().format('DD/MM/YYYY'), category: '', accountId: accounts[0]?.id || '', type: 'sortie' }); setAddMode(true); }} className="chip">+ Ajouter</button>
           </div>
