@@ -148,20 +148,6 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
     : [];
 
   const greeting = getGreeting(now.getHours());
-  const fullGreeting = `${greeting.text} Alicia`;
-  const [displayedGreeting, setDisplayedGreeting] = useState(fullGreeting);
-  const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    setDisplayedGreeting('');
-    let i = 0;
-    function type() {
-      i++;
-      setDisplayedGreeting(fullGreeting.slice(0, i));
-      if (i < fullGreeting.length) typingRef.current = setTimeout(type, 55);
-    }
-    typingRef.current = setTimeout(type, 55);
-    return () => { if (typingRef.current) clearTimeout(typingRef.current); };
-  }, [fullGreeting]);
 
   return (
     <div style={{ background: '#F2F4F7', minHeight: '100%', overflowX: 'hidden', width: '100%' }}>
@@ -205,7 +191,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
         return (
           <div style={{ background: 'linear-gradient(135deg, #D4A840 0%, #C9A040 50%, #B8902E 100%)', padding: '18px 20px 22px', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 16 }}>{displayedGreeting}</p>
+              <p style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 16, animation: 'greetingFadeIn 1.2s ease both' }}>{greeting.text} Alicia</p>
               <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>Solde personnel</p>
               <p style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>{fmt(animatedTotal)} €</p>
             </div>

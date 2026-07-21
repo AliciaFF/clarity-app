@@ -17,3 +17,8 @@ body {
 p {
   margin: 0;
 }
+
+@keyframes greetingFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
