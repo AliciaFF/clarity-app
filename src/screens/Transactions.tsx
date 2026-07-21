@@ -408,15 +408,16 @@ export default function Transactions() {
           </div>
 
           {/* Boutons en bas */}
-          <div style={{ padding: '16px', display: 'flex', gap: 12 }}>
+          <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'center', gap: 12 }}>
             <button onClick={() => setImportMode(true)}
-              style={{ flex: 1, background: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+              style={{ background: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 28 }}><IconDownload size={24} color="#0D0D0D" /></div>
               <p style={{ fontSize: 10, fontWeight: 600, color: '#0D0D0D', marginTop: 5 }}>Importer CSV</p>
             </button>
             <button onClick={() => { setNewTx({ label: '', amount: '', date: dayjs().format('DD/MM/YYYY'), category: '', accountId: accounts[0]?.id || '', type: 'sortie' }); setAddMode(true); }}
-              style={{ flex: 1, background: '#C9A040', border: 'none', borderRadius: 12, padding: '12px', cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#fff' }}>
-              + Ajouter
+              style={{ background: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 28 }}><span style={{ fontSize: 22, color: '#0D0D0D' }}>+</span></div>
+              <p style={{ fontSize: 10, fontWeight: 600, color: '#0D0D0D', marginTop: 5 }}>Ajouter</p>
             </button>
           </div>
 
