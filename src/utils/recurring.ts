@@ -12,11 +12,16 @@ export function groupRecurring(txs: Transaction[]): RecurringItem[] {
     if (!groups[key]) groups[key] = [];
     groups[key].push(t);
   }
-  return Object.values(groups).map(g => ({
-    label: g[0].label,
-    amount: g[0].amount,
-    dayOfMonth: Math.round(g.reduce((s, t) => s + dayjs(t.date).date(), 0) / g.length),
-  }));
+  return Object.values(groups)
+    .filter(g => {
+      const months = new Set(g.map(t => dayjs(t.date).format('YYYY-MM')));
+      return months.size >= 2;
+    })
+    .map(g => ({
+      label: g[0].label,
+      amount: g[0].amount,
+      dayOfMonth: Math.round(g.reduce((s, t) => s + dayjs(t.date).date(), 0) / g.length),
+    }));
 }
 
 export function detectRecurring(

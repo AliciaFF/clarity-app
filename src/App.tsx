@@ -133,12 +133,14 @@ export default function App() {
         <img src="/logo.png" alt="Clarity" style={{ width: 80, height: 80, objectFit: 'contain', borderRadius: 6 }} />
       </div>
       <div className="content">
-        {tab === 'dashboard' && <Dashboard onNavigate={setTab} />}
-        {tab === 'transactions' && <Transactions />}
-        {tab === 'installments' && <Installments />}
-        {tab === 'simulator' && <Simulator />}
-        {tab === 'projection' && <Projection />}
-        {tab === 'accounts' && <Accounts />}
+        <div key={tab} className="screen-enter">
+          {tab === 'dashboard' && <Dashboard onNavigate={setTab} />}
+          {tab === 'transactions' && <Transactions />}
+          {tab === 'installments' && <Installments />}
+          {tab === 'simulator' && <Simulator />}
+          {tab === 'projection' && <Projection />}
+          {tab === 'accounts' && <Accounts />}
+        </div>
       </div>
       <nav className="tab-bar" style={{ paddingBottom: isStandalone ? 30 : 8 }}>
         {TABS.map(t => {

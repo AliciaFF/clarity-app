@@ -2,6 +2,7 @@ import { fmt } from '../utils';
 import { useState, useEffect } from 'react';
 import { Storage } from '../storage';
 import { dialog } from '../dialog';
+import { IconTrash } from '@tabler/icons-react';
 import { detectRecurring, type RecurringItem } from '../utils/recurring';
 import type { InstallmentPlan, Account } from '../types';
 import dayjs from 'dayjs';
@@ -89,7 +90,7 @@ export default function Installments() {
               <div className="row">
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontWeight: 600, fontSize: 15, color: '#263238' }}>{r.label}</p>
-                  <p style={{ fontSize: 12, color: '#90A4AE', marginTop: 2 }}>Chaque mois vers le {r.dayOfMonth}</p>
+                  <p style={{ fontSize: 12, color: '#6B7A8D', marginTop: 2 }}>Chaque mois vers le {r.dayOfMonth}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                   <p style={{ fontSize: 16, fontWeight: 700, color: '#B71C1C' }}>{fmt(Math.abs(r.amount))} €</p>
@@ -99,7 +100,7 @@ export default function Installments() {
                     localStorage.setItem('bt_hidden_recurring', JSON.stringify(updated));
                     setHiddenRecurring(updated);
                     setRecurring(prev => prev.filter(x => x.label !== r.label));
-                  }} style={{ background: 'none', border: 'none', fontSize: 16, color: '#B71C1C', cursor: 'pointer', padding: '2px 4px' }}>🗑</button>
+                  }} style={{ background: 'none', border: 'none', color: '#B71C1C', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center' }}><IconTrash size={16} /></button>
                 </div>
               </div>
             </div>
@@ -123,14 +124,14 @@ export default function Installments() {
           <div className="card" key={p.id}>
             <div className="row" style={{ marginBottom: 4 }}>
               <p style={{ fontWeight: 700, fontSize: 16, color: '#C9A040', flex: 1 }}>{p.label}</p>
-              <button onClick={() => del(p.id)} style={{ background: '#FFEBEE', border: 'none', borderRadius: 8, fontSize: 16, color: '#EF5350', cursor: 'pointer', padding: '4px 8px' }}>🗑</button>
+              <button onClick={() => del(p.id)} style={{ background: '#FFEBEE', border: 'none', borderRadius: 8, color: '#EF5350', cursor: 'pointer', padding: '6px 10px', display: 'flex', alignItems: 'center' }}><IconTrash size={16} /></button>
             </div>
-            <p style={{ fontSize: 12, color: '#90A4AE', marginBottom: 10 }}>{getAccountName(p.accountId)}</p>
+            <p style={{ fontSize: 12, color: '#6B7A8D', marginBottom: 10 }}>{getAccountName(p.accountId)}</p>
 
             <div style={{ height: 6, background: '#E0E0E0', borderRadius: 3, marginBottom: 4 }}>
               <div style={{ height: 6, background: '#C9A040', borderRadius: 3, width: `${progress * 100}%` }} />
             </div>
-            <p style={{ fontSize: 12, color: '#90A4AE', marginBottom: 12 }}>{p.paidMonths}/{p.totalMonths} mensualités payées</p>
+            <p style={{ fontSize: 12, color: '#6B7A8D', marginBottom: 12 }}>{p.paidMonths}/{p.totalMonths} mensualités payées</p>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
               {[
@@ -139,7 +140,7 @@ export default function Installments() {
                 { label: 'Prochain', value: days <= 0 ? "Auj." : `J-${days}`, urgent: days <= 3 },
               ].map(item => (
                 <div key={item.label}>
-                  <p style={{ fontSize: 11, color: '#90A4AE', marginBottom: 2 }}>{item.label}</p>
+                  <p style={{ fontSize: 11, color: '#6B7A8D', marginBottom: 2 }}>{item.label}</p>
                   <p style={{ fontSize: 15, fontWeight: 700, color: item.urgent ? '#EF5350' : '#263238' }}>{item.value}</p>
                 </div>
               ))}

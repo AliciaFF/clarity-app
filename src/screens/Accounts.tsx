@@ -5,6 +5,27 @@ import { dialog } from '../dialog';
 import type { Account, AccountType } from '../types';
 import dayjs from 'dayjs';
 
+const IconEdit = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 2l3 3-8 8H3v-3l8-8z"/>
+  </svg>
+);
+const IconTrash = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="2,4 14,4"/><path d="M5 4V2h6v2"/><path d="M3 4l1 10h8l1-10"/>
+  </svg>
+);
+const IconDown = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 2v9M4 7l4 5 4-5"/>
+  </svg>
+);
+const IconUp = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 14V5M4 9l4-5 4 5"/>
+  </svg>
+);
+
 const empty = { name: '', balance: '', type: 'perso' as AccountType };
 
 function exportData() {
@@ -54,6 +75,7 @@ export default function Accounts() {
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
   const [form, setForm] = useState(empty);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setAccounts(Storage.getAccounts()); }, []);
@@ -102,31 +124,44 @@ export default function Accounts() {
       )}
 
       {accounts.map(acc => (
-        <div className="card" key={acc.id}>
-          <div className="row">
-            <div>
+        <div className="card" key={acc.id} style={{ position: 'relative' }}>
+          <div className="row" style={{ alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
               <p style={{ fontWeight: 700, fontSize: 16, color: '#263238' }}>{acc.name}</p>
-              <p style={{ fontSize: 12, color: '#90A4AE' }}>{acc.type === 'perso' ? 'Personnel' : acc.type === 'especes' ? 'Espèces' : 'Professionnel'}</p>
+              <p style={{ fontSize: 12, color: '#6B7A8D', marginTop: 2 }}>{acc.type === 'perso' ? 'Personnel' : acc.type === 'especes' ? 'Espèces' : 'Professionnel'}</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: acc.balance < 0 ? '#EF5350' : '#C9A040', marginTop: 8 }}>
+                {fmt(acc.balance)} €
+              </p>
+              <p style={{ fontSize: 11, color: '#6B7A8D', marginTop: 6 }}>Mis à jour le {dayjs(acc.lastUpdated).format('DD/MM/YYYY')}</p>
             </div>
-            <p style={{ fontSize: 22, fontWeight: 800, color: acc.balance < 0 ? '#EF5350' : '#C9A040' }}>
-              {fmt(acc.balance)} €
-            </p>
+            <button
+              onClick={() => setMenuOpen(menuOpen === acc.id ? null : acc.id)}
+              style={{ background: 'none', border: 'none', fontSize: 22, color: '#6B7A8D', cursor: 'pointer', padding: '0 4px', lineHeight: 1 }}>
+              ⋯
+            </button>
           </div>
-          <p style={{ fontSize: 11, color: '#B0BEC5', margin: '10px 0 12px' }}>Mis à jour le {dayjs(acc.lastUpdated).format('DD/MM/YYYY')}</p>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button style={{ flex: 1, background: '#C9A040', border: 'none', borderRadius: 10, padding: '10px', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }} onClick={() => openEdit(acc)}>✏️ Modifier</button>
-            <button style={{ flex: 1, background: '#B71C1C', border: 'none', borderRadius: 10, padding: '10px', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }} onClick={() => del(acc.id)}>🗑 Supprimer</button>
-          </div>
+          {menuOpen === acc.id && (
+            <div style={{ position: 'absolute', top: 40, right: 16, background: '#fff', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 10, overflow: 'hidden', minWidth: 150 }}>
+              <button onClick={() => { openEdit(acc); setMenuOpen(null); }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '14px 16px', background: 'none', border: 'none', fontSize: 14, fontWeight: 600, color: '#263238', cursor: 'pointer', borderBottom: '1px solid #F0F0F0' }}>
+                <IconEdit /> Modifier
+              </button>
+              <button onClick={() => { del(acc.id); setMenuOpen(null); }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '14px 16px', background: 'none', border: 'none', fontSize: 14, fontWeight: 600, color: '#C0392B', cursor: 'pointer' }}>
+                <IconTrash /> Supprimer
+              </button>
+            </div>
+          )}
         </div>
       ))}
 
       <div className="card" style={{ marginTop: 20 }}>
         <p style={{ fontSize: 14, fontWeight: 700, color: '#263238', marginBottom: 12 }}>Sauvegarde & Restauration</p>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn-primary" style={{ flex: 1 }} onClick={exportData}>⬇️ Sauvegarder</button>
-          <button className="btn-primary" style={{ flex: 1 }} onClick={() => importRef.current?.click()}>⬆️ Restaurer</button>
+          <button className="btn-primary" style={{ flex: 1 }} onClick={exportData}>Sauvegarder</button>
+          <button className="btn-primary" style={{ flex: 1 }} onClick={() => importRef.current?.click()}>Restaurer</button>
         </div>
-        <p style={{ fontSize: 12, color: '#90A4AE', marginTop: 10, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, color: '#6B7A8D', marginTop: 10, lineHeight: 1.5 }}>
           Sauvegardez vos données avant de réinstaller l'appli, puis restaurez-les ensuite.
         </p>
         <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }}
@@ -135,7 +170,7 @@ export default function Accounts() {
 
       <div className="card" style={{ marginTop: 12, textAlign: 'center' }}>
         <a href="/privacy.html" target="_blank" rel="noopener noreferrer"
-          style={{ fontSize: 12, color: '#90A4AE', textDecoration: 'none' }}>
+          style={{ fontSize: 12, color: '#6B7A8D', textDecoration: 'none' }}>
           Politique de confidentialité
         </a>
       </div>

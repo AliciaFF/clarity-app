@@ -1,5 +1,33 @@
 import { fmt } from '../utils';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useCountUp } from '../hooks/useCountUp';
+import {
+  IconShoppingCart, IconToolsKitchen2, IconShirt, IconCar, IconHome,
+  IconPill, IconDeviceGamepad2, IconBuildingBank, IconShieldCheck,
+  IconHanger, IconCash, IconArrowsExchange, IconCreditCard, IconCoin,
+  IconPaw, IconSchool, IconHeart, IconBallFootball, IconGift,
+  IconBabyCarriage, IconBox, IconDownload,
+} from '@tabler/icons-react';
+
+const CAT_ICONS: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
+  '🥖 Courses': IconShoppingCart, '🍕 Restauration': IconToolsKitchen2, '🛒 Shopping': IconShirt,
+  '🚗 Transport': IconCar, '🏠 Logement': IconHome, '💊 Santé': IconPill,
+  '🎮 Loisirs': IconDeviceGamepad2, '📋 Impôts': IconBuildingBank, '🔒 Assurance': IconShieldCheck,
+  '👔 Vêtements': IconHanger, '💶 Revenus': IconCash, '🔄 Virement': IconArrowsExchange,
+  '🏧 Retrait': IconCreditCard, '🏦 Frais bancaires': IconCoin, '🐶 Animaux': IconPaw,
+  '📖 Éducation': IconSchool, '🧘 Bien-être': IconHeart, '⚽ Sport': IconBallFootball,
+  '🎁 Cadeaux': IconGift, '🧸 Enfants': IconBabyCarriage, '💳 Crédit': IconCreditCard, '📦 Autres': IconBox,
+};
+
+const CAT_COLORS: Record<string, string> = {
+  '🥖 Courses': '#D4845A', '🍕 Restauration': '#C46A3A', '🛒 Shopping': '#B85C8A',
+  '🚗 Transport': '#5C8AB8', '🏠 Logement': '#4A6FA5', '💊 Santé': '#5A9E6F',
+  '🎮 Loisirs': '#7A5CA8', '📋 Impôts': '#6B7A8D', '🔒 Assurance': '#7A6552',
+  '👔 Vêtements': '#A8607A', '💶 Revenus': '#4A9E6A', '🔄 Virement': '#8A9BAE',
+  '🏧 Retrait': '#C4953A', '🏦 Frais bancaires': '#5A6B7A', '🐶 Animaux': '#7A9E5A',
+  '📖 Éducation': '#4A8FA8', '🧘 Bien-être': '#A87A8A', '⚽ Sport': '#3D8C7A',
+  '🎁 Cadeaux': '#8A5CA8', '🧸 Enfants': '#C4935A', '💳 Crédit': '#A85A5A', '📦 Autres': '#8A9298',
+};
 import { Storage } from '../storage';
 import type { Account, InstallmentPlan, Transaction } from '../types';
 import { importCSV } from '../utils/importCSV';
@@ -7,6 +35,58 @@ import { dialog } from '../dialog';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
 dayjs.locale('fr');
+
+function AccRow({ acc }: { acc: { id: string; name: string; type: string; balance: number } }) {
+  const animated = useCountUp(acc.balance);
+  return (
+    <div style={{ padding: '14px 16px', borderTop: '1px solid #F2F4F7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div>
+        <p style={{ fontSize: 16, fontWeight: 500, color: '#1A1A2E' }}>{acc.name}</p>
+        <p style={{ fontSize: 12, color: '#6B7A8D', marginTop: 2 }}>
+          {acc.type === 'perso' ? 'Compte personnel' : acc.type === 'especes' ? 'Espèces' : 'Professionnel'}
+        </p>
+      </div>
+      <p style={{ fontSize: 18, fontWeight: 700, color: acc.balance < 0 ? '#EF5350' : '#43A047' }}>
+        {fmt(animated)} € ›
+      </p>
+    </div>
+  );
+}
+
+function getGreeting(hour: number) {
+  if (hour >= 5 && hour < 12) return { text: 'Bonjour', icon: 'sun' };
+  if (hour >= 12 && hour < 18) return { text: 'Bon après-midi', icon: 'sun' };
+  if (hour >= 18 && hour < 22) return { text: 'Bonsoir', icon: 'moon' };
+  return { text: 'Bonne nuit', icon: 'moon' };
+}
+
+function BannerIllustration({ icon }: { icon: string }) {
+  const c = 'rgba(255,255,255,0.22)';
+  if (icon === 'moon') return (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <defs>
+        <mask id="moon-cut">
+          <rect width="72" height="72" fill="white" />
+          <circle cx="44" cy="28" r="17" fill="black" />
+        </mask>
+      </defs>
+      <circle cx="32" cy="36" r="20" fill="rgba(255,255,255,0.5)" mask="url(#moon-cut)" />
+    </svg>
+  );
+  return (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <circle cx="36" cy="36" r="10" fill={c} />
+      <line x1="36" y1="8" x2="36" y2="20" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="36" y1="52" x2="36" y2="64" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="8" y1="36" x2="20" y2="36" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="52" y1="36" x2="64" y2="36" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="15" y1="15" x2="23" y2="23" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="49" y1="49" x2="57" y2="57" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="57" y1="15" x2="49" y2="23" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="23" y1="49" x2="15" y2="57" stroke={c} strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -16,6 +96,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
   const [installments, setInstallments] = useState<InstallmentPlan[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState('');
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const accs = Storage.getAccounts();
@@ -55,6 +141,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
   };
 
   const totalBalance = accounts.filter(a => a.type !== 'pro').reduce((s, a) => s + a.balance, 0);
+  const animatedTotal = useCountUp(totalBalance);
   const recent = [...transactions].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
   const upcoming = installments.filter(i => dayjs(i.nextDueDate).diff(dayjs(), 'day') <= 30).sort((a, b) => dayjs(a.nextDueDate).diff(dayjs(b.nextDueDate)));
 
@@ -68,14 +155,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       {/* Search bar */}
       <div style={{ background: '#fff', padding: '12px 16px', borderBottom: '1px solid #EAECF0' }}>
         <div style={{ background: '#F2F4F7', borderRadius: 20, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: '#9AA5B4', fontSize: 14 }}>🔍</span>
+          <span style={{ color: '#6B7A8D', fontSize: 14 }}>🔍</span>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher une transaction"
             style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#1A1A2E', fontSize: 16, caretColor: '#C9A040' }}
           />
-          {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#9AA5B4', fontSize: 16, cursor: 'pointer', padding: 0 }}>✕</button>}
+          {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', color: '#6B7A8D', fontSize: 16, cursor: 'pointer', padding: 0 }}>✕</button>}
         </div>
       </div>
 
@@ -86,7 +173,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
             <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #F5F5F5' }}>
               <div>
                 <p style={{ fontSize: 13, fontWeight: 600, color: '#263238' }}>{t.label}</p>
-                <p style={{ fontSize: 11, color: '#90A4AE' }}>{dayjs(t.date).format('DD/MM/YYYY')} · {t.category}</p>
+                <p style={{ fontSize: 11, color: '#6B7A8D' }}>{dayjs(t.date).format('DD/MM/YYYY')} · {t.category}</p>
               </div>
               <p style={{ fontSize: 14, fontWeight: 700, color: t.amount < 0 ? '#EF5350' : '#43A047' }}>
                 {t.amount > 0 ? '+' : ''}{fmt(t.amount)} €
@@ -96,39 +183,37 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
         </div>
       )}
       {search.trim().length > 0 && searchResults.length === 0 && (
-        <div style={{ padding: 16, textAlign: 'center', color: '#90A4AE', fontSize: 13 }}>Aucun résultat</div>
+        <div style={{ padding: 16, textAlign: 'center', color: '#6B7A8D', fontSize: 13 }}>Aucun résultat</div>
       )}
 
       {/* Solde actuel */}
-      <div style={{ background: '#C9A040', padding: '24px 16px', textAlign: 'center' }}>
-        <p style={{ fontSize: 12, color: '#fff' }}>Solde personnel</p>
-        <p style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{fmt(totalBalance)} €</p>
-      </div>
+      {(() => {
+        const greeting = getGreeting(now.getHours());
+        const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return (
+          <div style={{ background: 'linear-gradient(135deg, #D4A840 0%, #C9A040 50%, #B8902E 100%)', padding: '18px 20px 22px', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 16 }}>{greeting.text} Alicia</p>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>Solde personnel</p>
+              <p style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>{fmt(animatedTotal)} €</p>
+            </div>
+            <BannerIllustration icon={greeting.icon} />
+          </div>
+        );
+      })()}
 
       {/* Comptes */}
       {accounts.length === 0 ? (
         <div style={{ background: '#fff', margin: '12px 16px', borderRadius: 12, padding: 20, textAlign: 'center' }}>
-          <p style={{ color: '#9AA5B4', fontSize: 14, marginBottom: 14 }}>Aucun compte configuré</p>
+          <p style={{ color: '#6B7A8D', fontSize: 14, marginBottom: 14 }}>Aucun compte configuré</p>
           <button className="btn-primary" onClick={() => onNavigate('accounts')}>Configurer mes comptes</button>
         </div>
       ) : (
         <div style={{ background: '#fff', marginTop: 12 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: '#9AA5B4', letterSpacing: 1, padding: '14px 16px 8px', textTransform: 'uppercase' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7A8D', letterSpacing: 1, padding: '14px 16px 8px', textTransform: 'uppercase' }}>
             Mes comptes · màj {accounts.length > 0 ? dayjs(accounts[0].lastUpdated).format('DD/MM') : dayjs().format('DD/MM')}
           </p>
-          {accounts.map(acc => (
-            <div key={acc.id} style={{ padding: '14px 16px', borderTop: '1px solid #F2F4F7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <p style={{ fontSize: 16, fontWeight: 500, color: '#1A1A2E' }}>{acc.name}</p>
-                <p style={{ fontSize: 12, color: '#9AA5B4', marginTop: 2 }}>
-                  {acc.type === 'perso' ? 'Compte personnel' : acc.type === 'especes' ? 'Espèces' : 'Professionnel'}
-                </p>
-              </div>
-              <p style={{ fontSize: 16, fontWeight: 700, color: acc.balance < 0 ? '#EF5350' : '#43A047' }}>
-                {fmt(acc.balance)} € ›
-              </p>
-            </div>
-          ))}
+          {accounts.map(acc => <AccRow key={acc.id} acc={acc} />)}
         </div>
       )}
 
@@ -136,7 +221,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       {upcoming.length > 0 && (
         <div style={{ background: '#fff', marginTop: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px 8px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#9AA5B4', letterSpacing: 1, textTransform: 'uppercase' }}>Prochains prélèvements</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7A8D', letterSpacing: 1, textTransform: 'uppercase' }}>Prochains prélèvements</p>
             <button onClick={() => onNavigate('installments')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#0D0D0D', fontWeight: 600, cursor: 'pointer' }}>Voir tout</button>
           </div>
           {upcoming.slice(0, 3).map(inst => {
@@ -146,7 +231,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
               <div key={inst.id} style={{ padding: '12px 16px', borderTop: '1px solid #F2F4F7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A2E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.label}</p>
-                  <p style={{ fontSize: 12, color: urgent ? '#EF5350' : '#9AA5B4', marginTop: 2, fontWeight: urgent ? 700 : 400 }}>
+                  <p style={{ fontSize: 12, color: urgent ? '#EF5350' : '#6B7A8D', marginTop: 2, fontWeight: urgent ? 700 : 400 }}>
                     {days === 0 ? "Aujourd'hui" : days === 1 ? 'Demain' : `Dans ${days} jours`}
                   </p>
                 </div>
@@ -161,17 +246,17 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       {recent.length > 0 && (
         <div style={{ background: '#fff', marginTop: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px 8px' }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#9AA5B4', letterSpacing: 1, textTransform: 'uppercase' }}>Dernières opérations</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7A8D', letterSpacing: 1, textTransform: 'uppercase' }}>Dernières opérations</p>
             <button onClick={() => onNavigate('transactions')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#0D0D0D', fontWeight: 600, cursor: 'pointer' }}>Voir tout</button>
           </div>
           {recent.map(t => (
             <div key={t.id} style={{ padding: '12px 16px', borderTop: '1px solid #F2F4F7', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 18, background: '#F2F4F7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-                {(cat => (cat.codePointAt(0) || 0) > 127 ? [...cat][0] : cat.substring(0, 2).toUpperCase())(t.category)}
+              <div style={{ width: 36, height: 36, borderRadius: 18, background: (CAT_COLORS[t.category] || '#8A9298') + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {(() => { const Icon = CAT_ICONS[t.category]; return Icon ? <Icon size={18} color={CAT_COLORS[t.category] || '#8A9298'} /> : <span style={{ fontSize: 16 }}>{[...t.category][0]}</span>; })()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A2E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.label}</p>
-                <p style={{ fontSize: 12, color: '#9AA5B4', marginTop: 1 }}>{dayjs(t.date).format('DD/MM/YYYY')}</p>
+                <p style={{ fontSize: 12, color: '#6B7A8D', marginTop: 1 }}>{dayjs(t.date).format('DD/MM/YYYY')}</p>
               </div>
               <p style={{ fontSize: 15, fontWeight: 700, color: t.amount < 0 ? '#EF5350' : '#43A047', flexShrink: 0 }}>
                 {t.amount > 0 ? '+' : ''}{fmt(t.amount)} €
@@ -185,7 +270,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       <div style={{ padding: '12px 16px', marginTop: 12, display: 'flex', justifyContent: 'center', gap: 12 }}>
         <button onClick={() => accounts.length === 1 ? importRef.current?.click() : setImportModal(true)}
           style={{ background: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', textAlign: 'center' }}>
-          <div style={{ fontSize: 22 }}>📥</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 28 }}><IconDownload size={24} color="#0D0D0D" /></div>
           <p style={{ fontSize: 10, fontWeight: 600, color: '#0D0D0D', marginTop: 5 }}>Importer CSV</p>
         </button>
         <button onClick={() => { setBalanceInput(''); setBalanceModal(true); }}
@@ -224,7 +309,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       {importModal && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setImportModal(false)}>
           <div className="modal">
-            <h2>📥 Importer CSV</h2>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><IconDownload size={20} color="#C9A040" /> Importer CSV</h2>
             <div className="spacer" />
             <label className="field-label">Pour quel compte ?</label>
             {accounts.map(a => (

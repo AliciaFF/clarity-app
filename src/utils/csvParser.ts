@@ -27,7 +27,7 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): { tra
   }
 
   for (const line of lines) {
-    const cols = line.split(';').map(c => c.replace(/"/g, '').trim());
+    const cols = parseCSVLine(line);
     if (cols.length < 10) continue;
     // Ignorer l'en-tête
     if (cols[0].toLowerCase().includes('date')) continue;
@@ -52,7 +52,7 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): { tra
     if (amount === 0) continue;
 
     transactions.push({
-      id: `${accountId}_${cols[0]}_${cols[3] || label}_${amount}_${transactions.length}`.replace(/\s/g, '_').substring(0, 80),
+      id: `${accountId}_${cols[0]}_${amount}_${label.substring(0, 20)}`.replace(/\s/g, '_').substring(0, 80),
       accountId,
       date: date.format('YYYY-MM-DD'),
       label: label.trim(),
@@ -61,6 +61,20 @@ export function parseCaisseEpargneCSV(content: string, accountId: string): { tra
     });
   }
   return { transactions, balance };
+}
+
+function parseCSVLine(line: string): string[] {
+  const cols: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === ';' && !inQuotes) { cols.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  cols.push(cur.trim());
+  return cols;
 }
 
 function mapCategory(cat: string, subCat: string): string {

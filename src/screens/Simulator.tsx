@@ -1,5 +1,7 @@
 import { fmt } from '../utils';
 import { useState, useRef } from 'react';
+import { dialog } from '../dialog';
+import { IconCamera, IconScan, IconChartDonut } from '@tabler/icons-react';
 import { Storage } from '../storage';
 import { detectRecurring } from '../utils/recurring';
 import dayjs from 'dayjs';
@@ -43,6 +45,10 @@ export default function Simulator() {
   const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const confirmed = await dialog.confirm(
+      "Cette photo va être envoyée au service OCR.space pour analyser le prix. Ne photographiez pas de documents contenant des informations personnelles. Continuer ?"
+    );
+    if (!confirmed) { e.target.value = ''; return; }
     const blobUrl = URL.createObjectURL(file);
     setImageUrl(blobUrl);
     setStep('loading');
@@ -234,13 +240,31 @@ export default function Simulator() {
               Ou entrer le prix manuellement
             </button>
           </div>
+
+          {/* Comment ça marche */}
+          <div style={{ marginTop: 20 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#6B7A8D', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>Comment ça marche</p>
+            {[
+              { Icon: IconCamera, title: 'Photographiez le prix', desc: 'Pointez votre caméra sur l\'étiquette ou l\'écran affichant le prix.' },
+              { Icon: IconScan, title: 'Détection automatique', desc: 'L\'image est analysée pour extraire le montant. L\'image est envoyée à OCR.space — ne photographiez pas de documents personnels.' },
+              { Icon: IconChartDonut, title: 'Simulation du solde', desc: 'Clarity calcule ce qu\'il vous restera après l\'achat, aujourd\'hui, dans 7 jours, 15 jours et 30 jours.' },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 18, background: '#F5EDD6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><s.Icon size={20} color="#C9A040" /></div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: '#263238', marginBottom: 2 }}>{s.title}</p>
+                  <p style={{ fontSize: 12, color: '#6B7A8D', lineHeight: 1.5 }}>{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {step === 'loading' && (
         <div style={{ padding: 40, textAlign: 'center' }}>
           {imageUrl && <img src={imageUrl} alt="photo" style={{ width: '100%', borderRadius: 12, marginBottom: 20, maxHeight: 300, objectFit: 'contain' }} />}
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><IconScan size={40} color="#C9A040" /></div>
           <p style={{ fontSize: 16, fontWeight: 700, color: '#1A1A2E' }}>Analyse en cours…</p>
           <p style={{ fontSize: 13, color: '#9AA5B4', marginTop: 6 }}>Détection du prix sur la photo</p>
         </div>

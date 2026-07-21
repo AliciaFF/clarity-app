@@ -4,6 +4,8 @@ import { Storage } from '../storage';
 import { detectRecurring, type RecurringItem } from '../utils/recurring';
 import type { Account, InstallmentPlan, Transaction } from '../types';
 import dayjs from 'dayjs';
+import { IconSettings } from '@tabler/icons-react';
+import { useCountUp } from '../hooks/useCountUp';
 
 const EXCLUDED_KEY = 'bt_projection_excluded';
 function loadExcluded(): string[] {
@@ -37,20 +39,28 @@ function computeProjection(account: Account, plans: InstallmentPlan[], txs: Tran
     const dayOfMonth = date.date();
     const events: { label: string; amount: number }[] = [];
 
+    const daysInMonth = date.daysInMonth();
     for (const plan of plans) {
       if (!plan.active) continue;
-      if (dayOfMonth === dayjs(plan.nextDueDate).date()) {
+      const planDay = Math.min(dayjs(plan.nextDueDate).date(), daysInMonth);
+      if (dayOfMonth === planDay) {
         events.push({ label: plan.label, amount: -plan.monthlyAmount });
       }
     }
     for (const rec of allRecurring) {
-      if (dayOfMonth === rec.dayOfMonth) events.push({ label: rec.label, amount: rec.amount });
+      const recDay = Math.min(rec.dayOfMonth, daysInMonth);
+      if (dayOfMonth === recDay) events.push({ label: rec.label, amount: rec.amount });
     }
 
     for (const e of events) balance += e.amount;
     result.push({ date: date.format('YYYY-MM-DD'), balance: Math.round(balance * 100) / 100, events });
   }
   return result;
+}
+
+function AnimatedBalance({ value }: { value: number }) {
+  const animated = useCountUp(value);
+  return <p style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{fmt(animated)} €</p>;
 }
 
 export default function Projection() {
@@ -98,8 +108,8 @@ export default function Projection() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 16px', paddingTop: '8px' }}>
-        <button onClick={() => setShowManage(true)} style={{ background: '#E8E8E8', border: 'none', borderRadius: 20, padding: '6px 14px', color: '#0D0D0D', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-          Gérer
+        <button onClick={() => setShowManage(true)} style={{ background: 'none', border: 'none', padding: '4px', color: '#6B7A8D', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          <IconSettings size={22} />
         </button>
       </div>
 
@@ -118,7 +128,7 @@ export default function Projection() {
         <div style={{ display: 'flex', gap: 10, padding: '10px 16px 0' }}>
           <div style={{ flex: 1, background: '#C9A040', borderRadius: 14, padding: 14, textAlign: 'center' }}>
             <p style={{ fontSize: 12, color: '#fff' }}>Solde actuel</p>
-            <p style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{fmt(account.balance)} €</p>
+            <AnimatedBalance value={account.balance} />
           </div>
         </div>
       )}
@@ -166,8 +176,8 @@ export default function Projection() {
                     <button
                       onClick={() => toggleExclude(r.label)}
                       style={{
-                        background: excluded.includes(r.label) ? '#FFEBEE' : '#E8F5E9',
-                        color: excluded.includes(r.label) ? '#EF5350' : '#43A047',
+                        background: excluded.includes(r.label) ? '#FFEBEE' : '#2E7D32',
+                        color: excluded.includes(r.label) ? '#EF5350' : '#fff',
                         border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0, marginLeft: 8
                       }}
                     >
