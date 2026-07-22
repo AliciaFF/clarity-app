@@ -153,7 +153,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
     <div style={{ background: '#F2F4F7', minHeight: '100%', overflowX: 'hidden', width: '100%' }}>
 
       {/* Search bar */}
-      <div style={{ background: '#fff', padding: '12px 16px', borderBottom: '1px solid #EAECF0' }}>
+      <div style={{ background: '#fff', padding: '20px 16px 12px', borderBottom: '1px solid #EAECF0' }}>
         <div style={{ background: '#F2F4F7', borderRadius: 20, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: '#6B7A8D', fontSize: 14 }}>🔍</span>
           <input
