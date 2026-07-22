@@ -342,7 +342,7 @@ export default function Simulator() {
           <button className="btn-primary" style={{ background: '#C9A040', color: '#fff' }} onClick={reset}>
             Nouvelle simulation
           </button>
-          <button className="btn-primary" style={{ marginTop: 10, background: '#C9A040', color: '#fff', border: 'none' }}
+          <button className="btn-primary" style={{ marginTop: 10, background: '#0D0D0D', color: '#C9A040', border: 'none' }}
             onClick={() => { setCart(c => [...c, detectedPrice! - cartTotal]); setDetectedPrice(null); setDetectedPrices([]); setManualPrice(''); setImageUrl(''); setError(''); setStep('idle'); if (inputRef.current) inputRef.current.value = ''; }}>
             Ajouter d'autres articles
           </button>
