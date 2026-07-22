@@ -143,10 +143,18 @@ export default function Projection() {
 
       {daysWithEvents.map(day => (
         <div key={day.date} className="card" style={{ borderLeft: day.balance < 0 ? '4px solid #EF5350' : '4px solid #E0E0E0', background: day.balance < 0 ? '#FFF8F8' : '#fff' }}>
-          <div className="row">
+          <div className="row" style={{ marginBottom: day.events.length > 0 ? 10 : 0 }}>
             <p style={{ fontWeight: 700, color: '#455A64' }}>{dayjs(day.date).format('ddd DD/MM')}</p>
             <p style={{ fontWeight: 700, color: day.balance < 0 ? '#EF5350' : '#43A047' }}>{fmt(day.balance)} €</p>
           </div>
+          {day.events.map((e, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: i === 0 ? 0 : 6, borderTop: i === 0 ? 'none' : '1px solid #F0F0F0' }}>
+              <p style={{ fontSize: 13, color: '#546E7A', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 8 }}>{e.label}</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: e.amount < 0 ? '#EF5350' : '#43A047', flexShrink: 0 }}>
+                {e.amount > 0 ? '+' : ''}{fmt(e.amount)} €
+              </p>
+            </div>
+          ))}
         </div>
       ))}
 
