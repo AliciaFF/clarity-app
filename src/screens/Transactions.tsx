@@ -120,6 +120,13 @@ function SpendingChart({ data, total, tab }: { data: { label: string; value: num
     return seg;
   });
 
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => {
+    setDrawn(false);
+    const t = setTimeout(() => setDrawn(true), 30);
+    return () => clearTimeout(t);
+  }, [data]);
+
   return (
     <div style={{ background: '#fff', borderRadius: 14, padding: 14, margin: '0 16px' }}>
       {/* Donut + légende */}
@@ -128,9 +135,10 @@ function SpendingChart({ data, total, tab }: { data: { label: string; value: num
           <circle cx={CX} cy={CY} r={R} fill="none" stroke="#F0F0F0" strokeWidth={STROKE} />
           {segments.map((s, i) => (
             <circle key={i} cx={CX} cy={CY} r={R} fill="none" stroke={s.color} strokeWidth={STROKE}
-              strokeDasharray={`${s.dash} ${CIRC - s.dash}`}
+              strokeDasharray={drawn ? `${s.dash} ${CIRC - s.dash}` : `0 ${CIRC}`}
               strokeDashoffset={CIRC / 4 - s.offset}
               transform={`rotate(-90 ${CX} ${CY})`}
+              style={{ transition: `stroke-dasharray 0.4s cubic-bezier(0.4,0,0.2,1) ${i * 0.15}s` }}
             />
           ))}
           <text x={CX} y={CY - 6} textAnchor="middle" fontSize="15" fontWeight="800" fill="#263238">{fmt(total)} €</text>
