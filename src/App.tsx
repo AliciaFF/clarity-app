@@ -130,7 +130,7 @@ export default function App() {
   return (
     <div className="app">
       <div style={{ background: '#0D0D0D', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0px 16px', paddingTop: 'env(safe-area-inset-top)', flexShrink: 0 }}>
-        <img src="/logo.png" alt="Clarity" style={{ width: 80, height: 80, objectFit: 'contain', borderRadius: 6 }} />
+        <img src="/logo.png" alt="Clarity" style={{ width: 66, height: 66, objectFit: 'contain', borderRadius: 6 }} />
       </div>
       <div className="content">
         <div key={tab} className="screen-enter">
