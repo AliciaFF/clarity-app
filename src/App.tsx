@@ -145,7 +145,7 @@ export default function App() {
       <nav className="tab-bar" style={{ paddingBottom: isStandalone ? 30 : 8 }}>
         {TABS.map(t => {
           const active = tab === t.id;
-          const color = active ? '#C9A040' : '#fff';
+          const color = active ? '#C9A040' : '#6B7A8D';
           return (
             <button key={t.id} className={`tab-btn ${active ? 'active' : ''}`} onClick={() => setTab(t.id)}>
               <t.Icon color={color} />
