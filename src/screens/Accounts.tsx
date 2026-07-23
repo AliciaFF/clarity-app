@@ -15,16 +15,6 @@ const IconTrash = () => (
     <polyline points="2,4 14,4"/><path d="M5 4V2h6v2"/><path d="M3 4l1 10h8l1-10"/>
   </svg>
 );
-const IconDown = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8 2v9M4 7l4 5 4-5"/>
-  </svg>
-);
-const IconUp = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8 14V5M4 9l4-5 4 5"/>
-  </svg>
-);
 
 const empty = { name: '', balance: '', type: 'perso' as AccountType };
 
