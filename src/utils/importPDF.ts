@@ -15,8 +15,10 @@ export async function importPDF(
   });
 
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || 'Erreur lors du traitement du PDF.');
+    const text = await response.text().catch(() => '');
+    let msg = `HTTP ${response.status}`;
+    try { const j = JSON.parse(text); msg = j.error || msg; } catch { msg = text || msg; }
+    throw new Error(msg);
   }
 
   const { transactions: parsed, balance: pdfBalance } = await response.json();
