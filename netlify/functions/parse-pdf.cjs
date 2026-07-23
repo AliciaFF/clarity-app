@@ -101,9 +101,15 @@ function parseCaisseEpargneText(text) {
 
   // Regroupe les lignes par bloc démarrant sur une date
   const dateStart = /^(\d{2}\/\d{2}\/\d{4})/;
+  const NOISE = [
+    /^Sauf erreur/i, /^En cas de/i, /^Page \d/i,
+    /^Date comptable/i, /^Pour nous contacter/i,
+    /^Votre relevé/i, /^SYNTHESE/i, /^BIC\s*:/i,
+  ];
   const groups = [];
   let current = null;
   for (const line of lines) {
+    if (NOISE.some(p => p.test(line))) continue;
     if (dateStart.test(line)) {
       if (current !== null) groups.push(current);
       current = line;
@@ -114,7 +120,8 @@ function parseCaisseEpargneText(text) {
   if (current !== null) groups.push(current);
 
   // Format : DD/MM/YYYY<libellé collé><montant>,<cents> EUR
-  const txRegex = /^(\d{2}\/\d{2}\/\d{4})(.*?)(\d[\d ]*,\d{2})\s*EUR\s*$/i;
+  // On coupe la chaîne au premier EUR (au cas où du texte de pied de page est collé après)
+  const txRegex = /^(\d{2}\/\d{2}\/\d{4})(.*?)(\d[\d ]*,\d{2})\s*EUR/i;
 
   const CREDIT_KEYWORDS = ['caf ', 'france travail', 'salaire', 'virement recu',
     'virement vers mlle alicia', 'remboursement', 'avoir', 'urssaf'];
