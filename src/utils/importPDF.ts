@@ -15,10 +15,12 @@ export async function importPDF(
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    let msg = `HTTP ${response.status}`;
-    try { const j = JSON.parse(text); msg = j.error || msg; } catch { msg = text || msg; }
-    throw new Error(msg);
+    const text = await response.text().catch(() => '(impossible de lire la réponse)');
+    throw new Error(
+      `URL appelée : ${response.url}\n` +
+      `Statut HTTP : ${response.status} ${response.statusText}\n` +
+      `Réponse serveur :\n${text.substring(0, 500)}`
+    );
   }
 
   const { transactions: parsed, balance: pdfBalance } = await response.json();
