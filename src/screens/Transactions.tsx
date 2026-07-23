@@ -106,6 +106,13 @@ function getCatLabel(cat: string) { return (cat.codePointAt(0) || 0) > 127 ? cat
 function getEmoji(cat: string) { return (cat.codePointAt(0) || 0) > 127 ? [...cat][0] : cat.substring(0, 2).toUpperCase(); }
 
 function SpendingChart({ data, total, tab }: { data: { label: string; value: number; color: string }[], total: number, tab: string }) {
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => {
+    setDrawn(false);
+    const t = setTimeout(() => setDrawn(true), 30);
+    return () => clearTimeout(t);
+  }, [data]);
+
   if (total === 0 || data.length === 0) return null;
 
   const R = 60, CX = 74, CY = 74, STROKE = 18;
@@ -119,13 +126,6 @@ function SpendingChart({ data, total, tab }: { data: { label: string; value: num
     offset += dash;
     return seg;
   });
-
-  const [drawn, setDrawn] = useState(false);
-  useEffect(() => {
-    setDrawn(false);
-    const t = setTimeout(() => setDrawn(true), 30);
-    return () => clearTimeout(t);
-  }, [data]);
 
   return (
     <div style={{ background: '#fff', borderRadius: 14, padding: 14, margin: '0 16px' }}>
