@@ -26,10 +26,28 @@ export async function importPDF(
     );
   }
 
-  const { transactions: parsed, balance: pdfBalance } = await response.json();
+  const json = await response.json();
+  const { transactions: parsed, balance: pdfBalance, _diag } = json;
 
   if (!parsed || parsed.length === 0) {
-    throw new Error('Aucune transaction trouvée dans ce PDF.');
+    const d = _diag;
+    if (!d) throw new Error('Aucune transaction trouvée dans ce PDF.');
+    const caseDesc = !d.chars
+      ? '❌ CAS 1 : Aucun texte extrait (PDF scanné/image ?)'
+      : d.candidateLines.length === 0
+        ? '❌ CAS 2 : Texte extrait mais aucune date ni montant détecté'
+        : d.candidateLines.every((c: any) => !c.reason.startsWith('OK'))
+          ? '❌ CAS 3/4 : Dates ou montants détectés mais structure non reconnue'
+          : '❌ CAS 5 : Transactions reconnues mais rejetées';
+    const candSummary = d.candidateLines.slice(0, 10)
+      .map((c: any) => `[${c.reason}]\n${c.line}`)
+      .join('\n---\n');
+    throw new Error(
+      `${caseDesc}\n\n` +
+      `Pages : ${d.pages} | Caractères : ${d.chars} | Lignes : ${d.totalLines}\n\n` +
+      `--- 2000 premiers caractères ---\n${d.extract}\n\n` +
+      `--- Lignes candidates (${d.candidateLines.length}) ---\n${candSummary || '(aucune)'}`
+    );
   }
 
   const catRules = Storage.getCatRules();

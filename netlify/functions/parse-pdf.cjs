@@ -12,6 +12,23 @@ exports.handler = async (event) => {
 
     const data = await pdfParse(body);
     const text = data.text;
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+    // DIAGNOSTIC
+    const datePattern = /^(\d{2}\/\d{2}\/\d{4})/;
+    const amountPattern = /([+-])\s*([\d\s]+,\d{2})\s*$/;
+    const diagLines = [];
+    for (const line of lines) {
+      const hasDate = datePattern.test(line);
+      const hasAmount = amountPattern.test(line);
+      if (hasDate || hasAmount) {
+        let reason = '';
+        if (hasDate && hasAmount) reason = 'OK - candidat transaction';
+        else if (hasDate && !hasAmount) reason = 'date trouvée MAIS pas de montant';
+        else if (!hasDate && hasAmount) reason = 'montant trouvé MAIS pas de date en début';
+        diagLines.push({ line: line.substring(0, 120), reason });
+      }
+    }
 
     const transactions = parseCaisseEpargneText(text);
     const balance = extractBalance(text);
@@ -19,7 +36,17 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactions, balance }),
+      body: JSON.stringify({
+        transactions,
+        balance,
+        _diag: {
+          pages: data.numpages,
+          chars: text.length,
+          totalLines: lines.length,
+          extract: text.substring(0, 2000),
+          candidateLines: diagLines.slice(0, 30),
+        }
+      }),
     };
   } catch (err) {
     return {
