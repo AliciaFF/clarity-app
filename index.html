@@ -11,6 +11,27 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Si l'appli ne monte pas dans les 5s, vider le cache SW et recharger
+      var _clarity_timeout = setTimeout(function() {
+        if (!document.getElementById('root').hasChildNodes()) {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              regs.forEach(function(r) { r.unregister(); });
+              caches.keys().then(function(keys) {
+                keys.forEach(function(k) { caches.delete(k); });
+                window.location.reload();
+              });
+            });
+          }
+        }
+      }, 5000);
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          if (document.getElementById('root').hasChildNodes()) clearTimeout(_clarity_timeout);
+        }, 100);
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
