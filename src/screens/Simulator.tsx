@@ -306,9 +306,9 @@ export default function Simulator() {
 
       {step === 'result' && account && detectedPrice !== null && (
         <div style={{ padding: 20 }}>
-          <div style={{ background: canAfford ? '#F5EDD6' : '#FFEBEE', borderRadius: 16, padding: 24, textAlign: 'center', marginBottom: 16 }}>
-            <p style={{ fontSize: 13, color: '#9AA5B4', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>Solde après achat</p>
-            <p style={{ fontSize: 38, fontWeight: 800, color: remaining! < 0 ? '#EF5350' : remaining! < 100 ? '#FF9800' : '#C9A040' }}>
+          <div style={{ background: canAfford ? 'linear-gradient(135deg, #D4A840, #C9A040, #B8902E)' : '#FFEBEE', borderRadius: 16, padding: 24, textAlign: 'center', marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: canAfford ? 'rgba(255,255,255,0.75)' : '#9AA5B4', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>Solde après achat</p>
+            <p style={{ fontSize: 38, fontWeight: 800, color: remaining! < 0 ? '#EF5350' : '#fff' }}>
               {fmt(remaining!)} €
             </p>
           </div>
