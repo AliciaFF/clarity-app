@@ -305,35 +305,35 @@ export default function Simulator() {
       )}
 
       {step === 'result' && account && detectedPrice !== null && (
-        <div style={{ padding: 20 }}>
-          <div style={{ background: canAfford ? 'linear-gradient(135deg, #D4A840, #C9A040, #B8902E)' : '#FFEBEE', borderRadius: 14, padding: 18, textAlign: 'center', marginBottom: 16 }}>
-            <p style={{ fontSize: 11, color: canAfford ? 'rgba(255,255,255,0.75)' : '#9AA5B4', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>Solde après achat</p>
+        <div style={{ padding: '20px 20px 32px' }}>
+          <div style={{ background: canAfford ? 'linear-gradient(135deg, #D4A840, #C9A040, #B8902E)' : '#FFEBEE', borderRadius: 14, padding: '22px 18px', textAlign: 'center', marginBottom: 20 }}>
+            <p style={{ fontSize: 11, color: canAfford ? 'rgba(255,255,255,0.75)' : '#9AA5B4', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>Solde après achat</p>
             <p style={{ fontSize: 30, fontWeight: 800, color: remaining! < 0 ? '#EF5350' : '#fff' }}>
               {fmt(remaining!)} €
             </p>
           </div>
 
-          <div className="card" style={{ marginBottom: 12 }}>
-            <div className="row" style={{ marginBottom: 8 }}>
+          <div className="card" style={{ marginBottom: 20 }}>
+            <div className="row" style={{ marginBottom: 12 }}>
               <p style={{ fontSize: 14, color: '#546E7A' }}>Solde actuel</p>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A2E' }}>{fmt(account.balance)} €</p>
             </div>
-            <div className="row" style={{ marginBottom: 8 }}>
+            <div className="row" style={{ marginBottom: 12 }}>
               <p style={{ fontSize: 14, color: '#546E7A' }}>{cart.length > 0 ? `Total ${cart.length + 1} articles` : 'Prix du produit'}</p>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#EF5350' }}>-{fmt(detectedPrice)} €</p>
             </div>
-            <div style={{ height: 1, background: '#F0F0F0', margin: '8px 0' }} />
+            <div style={{ height: 1, background: '#F0F0F0', margin: '4px 0 12px' }} />
             <div className="row">
               <p style={{ fontSize: 15, fontWeight: 700, color: '#1A1A2E' }}>Solde restant</p>
               <p style={{ fontSize: 15, fontWeight: 800, color: canAfford ? '#43A047' : '#EF5350' }}>{fmt(remaining!)} €</p>
             </div>
           </div>
 
-          <p className="section-title" style={{ marginBottom: 8 }}>Projection après achat</p>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <p className="section-title" style={{ marginBottom: 12 }}>Projection après achat</p>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 28 }}>
             {projections.map(({ days, balance }) => (
-              <div key={days} style={{ flex: 1, background: '#fff', borderRadius: 14, padding: '12px 8px', textAlign: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
-                <p style={{ fontSize: 11, color: '#9AA5B4', marginBottom: 6, fontWeight: 600 }}>J+{days}</p>
+              <div key={days} style={{ flex: 1, background: '#fff', borderRadius: 14, padding: '16px 8px', textAlign: 'center', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+                <p style={{ fontSize: 11, color: '#9AA5B4', marginBottom: 8, fontWeight: 600 }}>J+{days}</p>
                 <p style={{ fontSize: 15, fontWeight: 800, color: balance < 0 ? '#EF5350' : '#C9A040' }}>{fmt(balance)} €</p>
               </div>
             ))}
@@ -342,7 +342,7 @@ export default function Simulator() {
           <button className="btn-primary" style={{ background: '#C9A040', color: '#fff' }} onClick={reset}>
             Nouvelle simulation
           </button>
-          <button className="btn-primary" style={{ marginTop: 10, background: '#0D0D0D', color: '#C9A040', border: 'none' }}
+          <button className="btn-primary" style={{ marginTop: 12, background: '#0D0D0D', color: '#C9A040', border: 'none' }}
             onClick={() => { setCart(c => [...c, detectedPrice! - cartTotal]); setDetectedPrice(null); setDetectedPrices([]); setManualPrice(''); setImageUrl(''); setError(''); setStep('idle'); if (inputRef.current) inputRef.current.value = ''; }}>
             Ajouter d'autres articles
           </button>
