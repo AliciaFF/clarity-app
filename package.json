@@ -12,12 +12,14 @@
   "dependencies": {
     "@tabler/icons-react": "^3.45.0",
     "dayjs": "^1.11.21",
+    "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^6.1.200",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
