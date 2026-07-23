@@ -10,6 +10,13 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallbackDenylist: [/^\/.netlify/],
+        runtimeCaching: [
+          {
+            urlPattern: /^\/.netlify\//,
+            handler: 'NetworkOnly',
+          },
+        ],
       },
       manifest: {
         name: 'Clarity',
