@@ -6,23 +6,39 @@ export async function importPDF(
   accountId: string,
   currentAccounts: Account[],
 ): Promise<{ accounts: Account[]; transactions: Transaction[]; newCount: number }> {
-  // Envoyer le PDF à la Netlify Function pour parsing serveur
-  const arrayBuffer = await file.arrayBuffer();
   const fnUrl = window.location.hostname === 'localhost' || window.location.hostname.match(/^\d+\.\d+\.\d+\.\d+$/)
     ? 'https://wonderful-muffin-ddc2c7.netlify.app/.netlify/functions/parse-pdf'
     : '/.netlify/functions/parse-pdf';
-  const response = await fetch(fnUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/pdf' },
-    body: arrayBuffer,
-  });
+
+  // ÉTAPE 1 : lecture du fichier
+  let arrayBuffer: ArrayBuffer;
+  try {
+    arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(new Error(`ÉTAPE 1 ÉCHEC (FileReader) : ${reader.error?.message || 'erreur inconnue'}\nFichier : ${file.name} (${file.size} octets)`));
+      reader.readAsArrayBuffer(file);
+    });
+  } catch (e: any) {
+    throw new Error(`ÉTAPE 1 ÉCHEC (lecture fichier) : ${e.message}`);
+  }
+
+  // ÉTAPE 2 : envoi à la fonction
+  let response: Response;
+  try {
+    response = await fetch(fnUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/pdf' },
+      body: arrayBuffer,
+    });
+  } catch (e: any) {
+    throw new Error(`ÉTAPE 2 ÉCHEC (fetch réseau)\nURL : ${fnUrl}\nErreur : ${e.message}`);
+  }
 
   if (!response.ok) {
     const text = await response.text().catch(() => '(impossible de lire la réponse)');
     throw new Error(
-      `URL appelée : ${response.url}\n` +
-      `Statut HTTP : ${response.status} ${response.statusText}\n` +
-      `Réponse serveur :\n${text.substring(0, 500)}`
+      `ÉTAPE 2 ÉCHEC (réponse serveur)\nURL : ${response.url}\nStatut HTTP : ${response.status} ${response.statusText}\nRéponse :\n${text.substring(0, 600)}`
     );
   }
 
