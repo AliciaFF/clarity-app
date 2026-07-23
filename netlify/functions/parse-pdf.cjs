@@ -45,6 +45,7 @@ exports.handler = async (event) => {
           totalLines: lines.length,
           extract: text.substring(0, 2000),
           candidateLines: diagLines.slice(0, 30),
+          recognized: transactions.slice(0, 10).map(t => `${t.date} | ${t.label} | ${t.amount}€`),
         }
       }),
     };
@@ -98,36 +99,47 @@ function parseCaisseEpargneText(text) {
   const transactions = [];
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-  // Pattern : ligne qui commence par une date DD/MM/YYYY
-  const datePattern = /^(\d{2}\/\d{2}\/\d{4})/;
-  // Montant en fin de ligne : + ou - suivi d'un montant
-  const amountPattern = /([+-])\s*([\d\s]+,\d{2})\s*$/;
-
+  // Regroupe les lignes par bloc démarrant sur une date
+  const dateStart = /^(\d{2}\/\d{2}\/\d{4})/;
+  const groups = [];
+  let current = null;
   for (const line of lines) {
-    if (!datePattern.test(line)) continue;
+    if (dateStart.test(line)) {
+      if (current !== null) groups.push(current);
+      current = line;
+    } else if (current !== null) {
+      current += line; // colle les lignes de continuation
+    }
+  }
+  if (current !== null) groups.push(current);
 
-    const dateMatch = line.match(datePattern);
-    const amountMatch = line.match(amountPattern);
-    if (!dateMatch || !amountMatch) continue;
+  // Format : DD/MM/YYYY<libellé collé><montant>,<cents> EUR
+  const txRegex = /^(\d{2}\/\d{2}\/\d{4})(.*?)(\d[\d ]*,\d{2})\s*EUR\s*$/i;
 
-    const dateStr = dateMatch[1];
-    const sign = amountMatch[1] === '+' ? 1 : -1;
-    const amount = sign * parseFloat(amountMatch[2].replace(/\s/g, '').replace(',', '.'));
+  const CREDIT_KEYWORDS = ['caf ', 'france travail', 'salaire', 'virement recu',
+    'virement vers mlle alicia', 'remboursement', 'avoir', 'urssaf'];
+
+  for (const group of groups) {
+    const match = group.match(txRegex);
+    if (!match) continue;
+
+    const dateStr = match[1];
+    const rawLabel = match[2].trim().replace(/\s+/g, ' ');
+    const amount = parseFloat(match[3].replace(/\s/g, '').replace(',', '.'));
 
     if (isNaN(amount) || amount === 0) continue;
-
-    // Extraire le libellé : entre la 2e date et le montant
-    const afterDates = line.replace(/^\d{2}\/\d{2}\/\d{4}\s+\d{2}\/\d{2}\/\d{4}\s+/, '');
-    const rawLabel = afterDates.replace(amountPattern, '').trim().replace(/\s+/g, ' ');
-
     if (!rawLabel || rawLabel.toUpperCase().includes('SOLDE')) continue;
+
+    const lc = rawLabel.toLowerCase();
+    const isCredit = CREDIT_KEYWORDS.some(k => lc.includes(k));
+    const signedAmount = isCredit ? amount : -amount;
 
     const date = formatDate(dateStr);
     const category = guessCategory(rawLabel);
-    const id = `pdf_${date}_${amount}_${rawLabel.substring(0, 20)}`
+    const id = `pdf_${date}_${signedAmount}_${rawLabel.substring(0, 20)}`
       .replace(/\s/g, '_').replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 80);
 
-    transactions.push({ id, date, label: rawLabel, amount, category });
+    transactions.push({ id, date, label: rawLabel, amount: signedAmount, category });
   }
 
   return transactions;

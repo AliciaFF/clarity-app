@@ -29,6 +29,10 @@ export async function importPDF(
   const json = await response.json();
   const { transactions: parsed, balance: pdfBalance, _diag } = json;
 
+  if (_diag?.recognized?.length > 0) {
+    console.log('Transactions reconnues:', _diag.recognized);
+  }
+
   if (!parsed || parsed.length === 0) {
     const d = _diag;
     if (!d) throw new Error('Aucune transaction trouvée dans ce PDF.');
