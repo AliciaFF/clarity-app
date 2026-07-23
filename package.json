@@ -12,7 +12,7 @@
   "dependencies": {
     "@tabler/icons-react": "^3.45.0",
     "dayjs": "^1.11.21",
-    "pdf-parse": "^2.4.5",
+    "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^6.1.200",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
