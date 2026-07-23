@@ -8,7 +8,10 @@ export async function importPDF(
 ): Promise<{ accounts: Account[]; transactions: Transaction[]; newCount: number }> {
   // Envoyer le PDF à la Netlify Function pour parsing serveur
   const arrayBuffer = await file.arrayBuffer();
-  const response = await fetch('/.netlify/functions/parse-pdf', {
+  const fnUrl = window.location.hostname === 'localhost' || window.location.hostname.match(/^\d+\.\d+\.\d+\.\d+$/)
+    ? 'https://wonderful-muffin-ddc2c7.netlify.app/.netlify/functions/parse-pdf'
+    : '/.netlify/functions/parse-pdf';
+  const response = await fetch(fnUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/pdf' },
     body: arrayBuffer,
