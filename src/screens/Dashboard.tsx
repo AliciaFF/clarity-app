@@ -31,6 +31,7 @@ const CAT_COLORS: Record<string, string> = {
 import { Storage } from '../storage';
 import type { Account, InstallmentPlan, Transaction } from '../types';
 import { importCSV } from '../utils/importCSV';
+import { importPDF } from '../utils/importPDF';
 import { dialog } from '../dialog';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
@@ -89,8 +90,10 @@ function BannerIllustration({ icon }: { icon: string }) {
 export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const importRef = useRef<HTMLInputElement>(null);
+  const importPDFRef = useRef<HTMLInputElement>(null);
   const [importAccountId, setImportAccountId] = useState('');
   const [importModal, setImportModal] = useState(false);
+  const [importType, setImportType] = useState<'csv' | 'pdf'>('csv');
   const [installments, setInstallments] = useState<InstallmentPlan[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState('');
@@ -114,13 +117,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
     if (!file || !importAccountId) return;
     e.target.value = '';
     try {
-      const result = await importCSV(file, importAccountId, accounts);
+      const fn = importType === 'pdf' ? importPDF : importCSV;
+      const result = await fn(file, importAccountId, accounts);
       setTransactions(result.transactions);
       setAccounts(result.accounts);
       setImportModal(false);
       await dialog.alert(`✅ ${result.newCount} nouvelle(s) transaction(s) importée(s)\nSolde mis à jour !`);
-    } catch {
-      await dialog.alert('Erreur lors de l\'import. Vérifiez que le fichier est un CSV Caisse d\'Épargne valide.');
+    } catch (err: any) {
+      await dialog.alert(err?.message || 'Erreur lors de l\'import.');
     }
   };
 
@@ -267,9 +271,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
 
       {/* Actions rapides */}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '24px 16px 32px' }}>
-        <button onClick={() => accounts.length === 1 ? importRef.current?.click() : setImportModal(true)} className="chip">Importer CSV</button>
+        <button onClick={() => { setImportType('csv'); accounts.length === 1 ? importRef.current?.click() : setImportModal(true); }} className="chip">Importer CSV</button>
+        <button onClick={() => { setImportType('pdf'); accounts.length === 1 ? importPDFRef.current?.click() : setImportModal(true); }} className="chip">Importer PDF</button>
         <button onClick={() => { setBalanceInput(''); setBalanceModal(true); }} className="chip">Modifier solde</button>
         <input ref={importRef} type="file" accept=".csv,.txt,text/csv" onChange={handleImport} style={{ display: 'none' }} />
+        <input ref={importPDFRef} type="file" accept=".pdf,application/pdf" onChange={handleImport} style={{ display: 'none' }} />
       </div>
 
       <div style={{ height: 80 }} />
@@ -300,7 +306,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
       {importModal && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setImportModal(false)}>
           <div className="modal">
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><IconDownload size={20} color="#C9A040" /> Importer CSV</h2>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><IconDownload size={20} color="#C9A040" /> Importer {importType.toUpperCase()}</h2>
             <div className="spacer" />
             <label className="field-label">Pour quel compte ?</label>
             {accounts.map(a => (
@@ -310,7 +316,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: string) =>
               </button>
             ))}
             <div className="spacer" />
-            <input type="file" accept=".csv,.txt,text/csv" onChange={handleImport}
+            <input type="file" accept={importType === 'pdf' ? '.pdf,application/pdf' : '.csv,.txt,text/csv'} onChange={handleImport}
               style={{ width: '100%', padding: '14px', background: '#0D0D0D', color: '#fff', borderRadius: 12, fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer' }} />
             <div style={{ height: 10 }} />
             <button className="btn-secondary" style={{ width: '100%' }} onClick={() => setImportModal(false)}>Annuler</button>
